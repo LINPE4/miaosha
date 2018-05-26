@@ -1,10 +1,12 @@
 package com.peter.miaosha.controller;
 
 import com.peter.miaosha.domain.User;
+import com.peter.miaosha.redis.RedisService;
 import com.peter.miaosha.result.CodeMsg;
 import com.peter.miaosha.result.Result;
 import com.peter.miaosha.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +18,9 @@ public class DemoController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RedisService redisService;
 
     @RequestMapping("/")
     @ResponseBody
@@ -56,6 +61,20 @@ public class DemoController {
     public Result<Boolean> dbTx() {
         userService.tx();
         return Result.success(true);
+    }
+
+    @RequestMapping("/redis/get")
+    @ResponseBody
+    public Result<String> redisGet() {
+        String v1 = redisService.get("name", String.class);
+        return Result.success(v1);
+    }
+
+    @RequestMapping("/redis/set")
+    @ResponseBody
+    public Result<Boolean> redisSet() {
+        Boolean result = redisService.set("name","peter");
+        return Result.success(result);
     }
 
 }
