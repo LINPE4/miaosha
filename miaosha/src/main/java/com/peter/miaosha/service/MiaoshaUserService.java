@@ -1,13 +1,6 @@
 package com.peter.miaosha.service;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-
-import com.sun.org.apache.bcel.internal.classfile.Code;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.alibaba.druid.util.StringUtils;
 import com.peter.miaosha.dao.MiaoshaUserDao;
 import com.peter.miaosha.domain.MiaoshaUser;
 import com.peter.miaosha.exception.GlobalException;
@@ -15,7 +8,13 @@ import com.peter.miaosha.redis.MiaoshaUserKey;
 import com.peter.miaosha.redis.RedisService;
 import com.peter.miaosha.result.CodeMsg;
 import com.peter.miaosha.util.MD5Util;
+import com.peter.miaosha.util.UUIDUtil;
 import com.peter.miaosha.vo.LoginVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 @Service
 public class MiaoshaUserService {
@@ -31,6 +30,18 @@ public class MiaoshaUserService {
 	
 	public MiaoshaUser getById(long id) {
 		return miaoshaUserDao.getById(id);
+	}
+
+	public MiaoshaUser getByToken(HttpServletResponse response, String token) {
+		if(StringUtils.isEmpty(token)) {
+			return null;
+		}
+		MiaoshaUser user = redisService.get(MiaoshaUserKey.token, token, MiaoshaUser.class);
+		//延长有效期
+		if(user != null) {
+			addCookie(response, token, user);
+		}
+		return user;
 	}
 
 	public boolean login(HttpServletResponse response, LoginVo loginVo) {
@@ -51,6 +62,17 @@ public class MiaoshaUserService {
 		if(!calcPass.equals(dbPass)) {
 			throw new GlobalException(CodeMsg.PASSWORD_ERROR);
 		}
+		//生成cookie
+		String token	 = UUIDUtil.uuid();
+		addCookie(response, token, user);
 		return true;
+	}
+
+	private void addCookie(HttpServletResponse response, String token, MiaoshaUser user) {
+		redisService.set(MiaoshaUserKey.token, token, user);
+		Cookie cookie = new Cookie(COOKI_NAME_TOKEN, token);
+		cookie.setMaxAge(MiaoshaUserKey.token.expireSeconds());
+		cookie.setPath("/");
+		response.addCookie(cookie);
 	}
 }
