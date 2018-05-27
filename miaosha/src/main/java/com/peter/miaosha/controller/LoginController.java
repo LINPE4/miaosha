@@ -36,20 +36,8 @@ public class LoginController {
     
     @RequestMapping("/do_login")
     @ResponseBody
-    public Result doLogin(HttpServletResponse response, LoginVo loginVo) {
+    public Result doLogin(HttpServletResponse response,@Valid LoginVo loginVo) {
     	log.info(loginVo.toString());
-    	// 参数校验
-        String mobil = loginVo.getMobile();
-        String password = loginVo.getPassword();
-        if (StringUtils.isEmpty(mobil)) {
-            return Result.error(CodeMsg.MOBILE_EMPTY);
-        }
-        if (StringUtils.isEmpty(password)) {
-            return Result.error(CodeMsg.PASSWORD_EMPTY);
-        }
-        if (!ValidatorUtil.isMobile(mobil)) {
-            return Result.error(CodeMsg.MOBILE_ERROR);
-        }
     	//登录
     	CodeMsg cm = userService.login(response, loginVo);
         if (cm.getCode() == 0) {
