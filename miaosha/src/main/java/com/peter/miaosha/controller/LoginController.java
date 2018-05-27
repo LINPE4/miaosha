@@ -36,14 +36,10 @@ public class LoginController {
     
     @RequestMapping("/do_login")
     @ResponseBody
-    public Result doLogin(HttpServletResponse response,@Valid LoginVo loginVo) {
+    public Result<Boolean> doLogin(HttpServletResponse response,@Valid LoginVo loginVo) {
     	log.info(loginVo.toString());
     	//登录
-    	CodeMsg cm = userService.login(response, loginVo);
-        if (cm.getCode() == 0) {
-            return Result.success(true);
-        } else {
-            return Result.error(cm);
-        }
+    	userService.login(response, loginVo);
+        return Result.success(true);
     }
 }
