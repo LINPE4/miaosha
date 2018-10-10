@@ -1,18 +1,28 @@
 package com.peter.miaosha.controller;
 
-import com.peter.miaosha.domain.MiaoshaUser;
-import com.peter.miaosha.redis.RedisService;
-import com.peter.miaosha.service.GoodsService;
-import com.peter.miaosha.service.MiaoshaUserService;
-import com.peter.miaosha.vo.GoodsVo;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.peter.miaosha.redis.GoodsKey;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
-
+import com.peter.miaosha.domain.MiaoshaUser;
+import com.peter.miaosha.redis.RedisService;
+import com.peter.miaosha.result.Result;
+import com.peter.miaosha.service.GoodsService;
+import com.peter.miaosha.service.MiaoshaUserService;
+import com.peter.miaosha.vo.GoodsVo;
+import org.thymeleaf.spring4.context.SpringWebContext;
+import org.thymeleaf.spring4.view.ThymeleafViewResolver;
 @Controller
 @RequestMapping("/goods")
 public class GoodsController {
@@ -26,20 +36,46 @@ public class GoodsController {
 	@Autowired
 	GoodsService goodsService;
 
-	@RequestMapping("/to_list")
-	public String list(Model model,MiaoshaUser user) {
+	@Autowired
+	ThymeleafViewResolver thymeleafViewResolver;
+
+	@Autowired
+	ApplicationContext applicationContext;
+
+	@RequestMapping(value="/to_list", produces="text/html")
+	@ResponseBody
+	public String list(HttpServletRequest request, HttpServletResponse response, Model model,MiaoshaUser user) {
 		model.addAttribute("user", user);
-		//查询商品列表
+		//取缓存
+		String html = redisService.get(GoodsKey.getGoodsList, "", String.class);
+		if(!StringUtils.isEmpty(html)) {
+			return html;
+		}
 		List<GoodsVo> goodsList = goodsService.listGoodsVo();
 		model.addAttribute("goodsList", goodsList);
-		return "goods_list";
+//    	 return "goods_list";
+		SpringWebContext ctx = new SpringWebContext(request,response,
+				request.getServletContext(),request.getLocale(), model.asMap(), applicationContext );
+		//手动渲染
+		html = thymeleafViewResolver.getTemplateEngine().process("goods_list", ctx);
+		if(!StringUtils.isEmpty(html)) {
+			redisService.set(GoodsKey.getGoodsList, "", html);
+		}
+		return html;
 	}
 
-	@RequestMapping("/to_detail/{goodsId}")
-	public String detail(Model model,MiaoshaUser user,
-						 @PathVariable("goodsId")long goodsId) {
+	@RequestMapping(value="/to_detail/{goodsId}",produces="text/html")
+	@ResponseBody
+	public String detail2(HttpServletRequest request, HttpServletResponse response, Model model,MiaoshaUser user,
+						  @PathVariable("goodsId")long goodsId) {
 		model.addAttribute("user", user);
 
+		//取缓存
+		String html = redisService.get(GoodsKey.getGoodsDetail, ""+goodsId, String.class);
+		if(!StringUtils.isEmpty(html)) {
+			return html;
+		}
+		//手动渲染
 		GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
 		model.addAttribute("goods", goods);
 
@@ -61,9 +97,16 @@ public class GoodsController {
 		}
 		model.addAttribute("miaoshaStatus", miaoshaStatus);
 		model.addAttribute("remainSeconds", remainSeconds);
-		return "goods_detail";
+//        return "goods_detail";
+
+		SpringWebContext ctx = new SpringWebContext(request,response,
+				request.getServletContext(),request.getLocale(), model.asMap(), applicationContext );
+		html = thymeleafViewResolver.getTemplateEngine().process("goods_detail", ctx);
+		if(!StringUtils.isEmpty(html)) {
+			redisService.set(GoodsKey.getGoodsDetail, ""+goodsId, html);
+		}
+		return html;
 	}
 
 
-    
 }
