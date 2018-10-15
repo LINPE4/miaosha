@@ -91,4 +91,11 @@ public class DemoController {
         return Result.success("Hello，world");
     }
 
+    @RequestMapping("/mq/topic")
+    @ResponseBody
+    public Result<String> topic() {
+		sender.sendTopic("hello,imooc");
+        return Result.success("Hello，world");
+    }
+
 }
