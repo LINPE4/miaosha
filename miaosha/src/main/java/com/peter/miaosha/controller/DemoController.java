@@ -104,4 +104,11 @@ public class DemoController {
 		sender.sendFanout("hello,imooc");
         return Result.success("Hello，world");
     }
+
+    @RequestMapping("/mq/header")
+    @ResponseBody
+    public Result<String> header() {
+		sender.sendHeader("hello,imooc");
+        return Result.success("Hello，world");
+    }
 }

@@ -4,6 +4,9 @@ import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class MQConfig {
 
@@ -64,5 +67,24 @@ public class MQConfig {
 	@Bean
 	public Binding FanoutBinding2() {
 		return BindingBuilder.bind(topicQueue2()).to(fanoutExchage());
+	}
+
+	/**
+	 * Header模式 交换机Exchange
+	 * */
+	@Bean
+	public HeadersExchange headersExchage(){
+		return new HeadersExchange(HEADERS_EXCHANGE);
+	}
+	@Bean
+	public Queue headerQueue1() {
+		return new Queue(HEADER_QUEUE, true);
+	}
+	@Bean
+	public Binding headerBinding() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("header1", "value1");
+		map.put("header2", "value2");
+		return BindingBuilder.bind(headerQueue1()).to(headersExchage()).whereAll(map).match();
 	}
 }
