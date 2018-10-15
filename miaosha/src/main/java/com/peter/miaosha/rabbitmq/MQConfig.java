@@ -1,9 +1,6 @@
 package com.peter.miaosha.rabbitmq;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -51,5 +48,21 @@ public class MQConfig {
 	@Bean
 	public Binding topicBinding2() {
 		return BindingBuilder.bind(topicQueue2()).to(topicExchage()).with("topic.#");
+	}
+
+	/**
+	 * Fanout模式 交换机Exchange
+	 * */
+	@Bean
+	public FanoutExchange fanoutExchage(){
+		return new FanoutExchange(FANOUT_EXCHANGE);
+	}
+	@Bean
+	public Binding FanoutBinding1() {
+		return BindingBuilder.bind(topicQueue1()).to(fanoutExchage());
+	}
+	@Bean
+	public Binding FanoutBinding2() {
+		return BindingBuilder.bind(topicQueue2()).to(fanoutExchage());
 	}
 }

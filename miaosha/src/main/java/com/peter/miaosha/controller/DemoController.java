@@ -98,4 +98,10 @@ public class DemoController {
         return Result.success("Hello，world");
     }
 
+    @RequestMapping("/mq/fanout")
+    @ResponseBody
+    public Result<String> fanout() {
+		sender.sendFanout("hello,imooc");
+        return Result.success("Hello，world");
+    }
 }
