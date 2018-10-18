@@ -3,6 +3,8 @@ package com.peter.miaosha.service;
 import com.peter.miaosha.domain.MiaoshaOrder;
 import com.peter.miaosha.redis.MiaoshaKey;
 import com.peter.miaosha.redis.RedisService;
+import com.peter.miaosha.util.MD5Util;
+import com.peter.miaosha.util.UUIDUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,4 +66,20 @@ public class MiaoshaService {
 		goodsService.resetStock(goodsList);
 		orderService.deleteOrders();
 	}
+
+	public boolean checkPath(MiaoshaUser user, long goodsId, String path) {
+		if (user == null || path == null) {
+			return false;
+		}
+		String pathOld = redisService.get(MiaoshaKey.getMiaoshaPath, user.getId() + "" + goodsId, String.class);
+		return path.equals(pathOld);
+	}
+
+	public String createMiaoshaPath(MiaoshaUser user, long goodsId) {
+		String str = MD5Util.md5(UUIDUtil.uuid() + "123456");
+		redisService.set(MiaoshaKey.getMiaoshaPath,user.getId() + "" + goodsId, str);
+		return str;
+	}
+
+
 }
