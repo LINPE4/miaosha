@@ -1,5 +1,6 @@
 package com.peter.miaosha.controller;
 
+import com.peter.miaosha.access.NeedLogin;
 import com.peter.miaosha.domain.User;
 import com.peter.miaosha.rabbitmq.MQSender;
 import com.peter.miaosha.redis.RedisService;
@@ -109,6 +110,13 @@ public class DemoController {
     @ResponseBody
     public Result<String> header() {
 		sender.sendHeader("hello,imooc");
+        return Result.success("Hello，world");
+    }
+
+    @NeedLogin
+    @RequestMapping("/test_login")
+    @ResponseBody
+    public Result<String> test_login() {
         return Result.success("Hello，world");
     }
 }
