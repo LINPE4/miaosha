@@ -1,5 +1,6 @@
 package com.peter.miaosha.controller;
 
+import com.peter.miaosha.access.AccessLimit;
 import com.peter.miaosha.rabbitmq.MQSender;
 import com.peter.miaosha.rabbitmq.MiaoshaMessage;
 import com.peter.miaosha.redis.GoodsKey;
@@ -154,6 +155,7 @@ public class MiaoshaController implements InitializingBean {
 		return Result.success(result);
 	}
 
+    @AccessLimit(seconds=5, maxCount=5, needLogin=true)
 	@RequestMapping(value="/path", method=RequestMethod.GET)
 	@ResponseBody
 	public Result<String> getMiaoshaPath(MiaoshaUser user,
@@ -170,6 +172,7 @@ public class MiaoshaController implements InitializingBean {
 		return Result.success(path);
 	}
 
+    @AccessLimit(seconds=5, maxCount=5, needLogin=true)
 	@RequestMapping(value="/verifyCode", method=RequestMethod.GET)
 	@ResponseBody
 	public Result<String> getMiaoshaVerifyCod(HttpServletResponse response, MiaoshaUser user,
