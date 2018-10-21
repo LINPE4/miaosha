@@ -76,7 +76,7 @@ public class MiaoshaService {
 		if (user == null || path == null) {
 			return false;
 		}
-		String pathOld = redisService.get(MiaoshaKey.getMiaoshaPath, user.getId() + "" + goodsId, String.class);
+		String pathOld = redisService.get(MiaoshaKey.getMiaoshaPath, user.getId() + "_"+ goodsId, String.class);
 		return path.equals(pathOld);
 	}
 
@@ -85,7 +85,7 @@ public class MiaoshaService {
 			return null;
 		}
 		String str = MD5Util.md5(UUIDUtil.uuid()+"123456");
-		redisService.set(MiaoshaKey.getMiaoshaPath, ""+user.getId() + "_"+ goodsId, str);
+		redisService.set(MiaoshaKey.getMiaoshaPath, user.getId() + "_"+ goodsId, str);
 		return str;
 	}
 

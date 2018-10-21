@@ -157,10 +157,15 @@ public class MiaoshaController implements InitializingBean {
 	@RequestMapping(value="/path", method=RequestMethod.GET)
 	@ResponseBody
 	public Result<String> getMiaoshaPath(MiaoshaUser user,
-										 @RequestParam("goodsId")long goodsId) {
+                                         @RequestParam("goodsId")long goodsId,
+                                         @RequestParam(value="verifyCode", defaultValue="0")int verifyCode) {
 		if(user == null) {
 			return Result.error(CodeMsg.SESSION_ERROR);
 		}
+        boolean check = miaoshaService.checkVerifyCode(user, goodsId, verifyCode);
+        if(!check) {
+            return Result.error(CodeMsg.REQUEST_ILLEGAL);
+        }
 		String path  = miaoshaService.createMiaoshaPath(user, goodsId);
 		return Result.success(path);
 	}

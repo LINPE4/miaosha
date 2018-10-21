@@ -81,7 +81,8 @@
             url:"/miaosha/path",
             type:"GET",
             data:{
-                goodsId:goodsId
+                goodsId:goodsId,
+                verifyCode:$("#verifyCode").val()
             },
             success:function(data){
                 if(data.code == 0){
