@@ -13,10 +13,13 @@ import com.peter.miaosha.domain.MiaoshaUser;
 import com.peter.miaosha.domain.OrderInfo;
 import com.peter.miaosha.vo.GoodsVo;
 
+import javax.imageio.ImageIO;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Random;
 
@@ -160,5 +163,41 @@ public class MiaoshaService {
 		char op2 = ops[rdm.nextInt(3)];
 		String exp = ""+ num1 + op1 + num2 + op2 + num3;
 		return exp;
+	}
+
+	public static void main(String[] args) {
+		MiaoshaService ms = new MiaoshaService();
+		int width = 80;
+		int height = 32;
+		//create the image
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics g = image.getGraphics();
+		// set the background color
+		g.setColor(new Color(0xDCDCDC));
+		g.fillRect(0, 0, width, height);
+		// draw the border
+		g.setColor(Color.black);
+		g.drawRect(0, 0, width - 1, height - 1);
+		// create a random instance to generate the codes
+		Random rdm = new Random();
+		// make some confusion
+		for (int i = 0; i < 50; i++) {
+			int x = rdm.nextInt(width);
+			int y = rdm.nextInt(height);
+			g.drawOval(x, y, 0, 0);
+		}
+		// generate a random code
+		String verifyCode = ms.generateVerifyCode(rdm);
+		g.setColor(new Color(0, 100, 0));
+		g.setFont(new Font("Candara", Font.BOLD, 24));
+		g.drawString(verifyCode, 8, 24);
+		g.dispose();
+
+		try {
+			OutputStream outputStream = new FileOutputStream("D:a.jpeg");
+			ImageIO.write(image, "JPEG", outputStream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
